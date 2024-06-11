@@ -89,6 +89,11 @@ class ChatGPTBot(Bot, OpenAIImage):
             elif reply_content["completion_tokens"] > 0:
                 self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
                 reply = Reply(ReplyType.TEXT, reply_content["content"])
+            elif len(reply_content["content"]) < 1:
+                reply = Reply(ReplyType.ERROR, reply_content["content"])
+                # 当收到消息为空时，清除记忆，并让用户重新提问
+                self.sessions.clear_session(session_id)
+                self.sessions.session_reply("请重新描述您的问题~", session_id)
             else:
                 reply = Reply(ReplyType.ERROR, reply_content["content"])
                 logger.debug("[CHATGPT] reply {} used 0 tokens.".format(reply_content))
